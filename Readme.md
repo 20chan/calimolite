@@ -15,6 +15,8 @@ These results are trimmed some start letters to make more naturally:
 lununetelisats
 binopreyponime
 sayphempullity
+mintymiarang
+locopiton
 stonimemon
 qustesculi
 dopesstiz
