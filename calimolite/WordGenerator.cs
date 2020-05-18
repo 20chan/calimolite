@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace calimolite {
     public class WordGenerator {
-        private static readonly char[] characters = "abcdefghijklmnopqrstuvxyz\0".ToCharArray();
+        private static readonly char[] characters = "abcdefghijklmnopqrstuvwxyz\0".ToCharArray();
 
         private readonly Array[] weightsList;
         private readonly int weightLength;
@@ -25,12 +25,12 @@ namespace calimolite {
 
             foreach (var word in words) {
                 var wordPadded = word + '\0';
-                for (var i = 0; i < wordPadded.Length; i++) {
+                for (var i = 0; i < wordPadded.Length + 1; i++) {
                     for (var j = 1; j < weightLength; j++) {
                         if (0 < i - j) {
                             Add(wordPadded.ToLower().AsSpan().Slice(i - j, j));
                         }
-                        if (i + j < word.Length) {
+                        if (i + j < wordPadded.Length) {
                             Add(wordPadded.ToLower().AsSpan().Slice(i, j));
                         }
                     }
@@ -60,12 +60,18 @@ namespace calimolite {
             }
         }
 
-        public string Generate(int seed) {
+        public string Generate(int seed, string prefix) {
             var result = new List<int>();
             var r = new Random(seed);
-            result.Add(r.Next(characters.Length));
+            if (prefix.Length == 0) {
+                result.Add(r.Next(characters.Length));
+            } else {
+                foreach (var c in prefix) {
+                    result.Add(c - 'a');
+                }
+            }
 
-            for (var i = 1;; i++) {
+            for (var i = result.Count;; i++) {
                 var weights = new float[characters.Length];
                 var min = Math.Max(i - weightLength + 1, 0);
 

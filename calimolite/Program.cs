@@ -20,7 +20,7 @@ namespace calimolite {
                     generator.powers = read.TrimStart('/').Split().Select(s => float.Parse(s)).ToArray();
                     Console.WriteLine("powers set");
                 } else {
-                    var generated = generator.Generate(Environment.TickCount);
+                    var generated = generator.Generate(Environment.TickCount, read);
                     Console.WriteLine(generated);
                 }
             }
