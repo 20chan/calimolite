@@ -87,7 +87,7 @@ namespace calimolite {
                     random -= weights[j];
                     if (random <= 0) {
                         if (j == weights.Length - 1) {
-                            return new string(result.Select(i => characters[i]).ToArray());
+                            return new string(result.Select(c => characters[c]).ToArray());
                         }
                         result.Add(j);
                         break;
