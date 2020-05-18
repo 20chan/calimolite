@@ -10,17 +10,17 @@ namespace calimolite {
             }
 
             var words = System.IO.File.ReadAllLines(args[0]);
-            var generator = new WordGenerator(words, "abcdefghijklmnopqrstuvwxyz".ToCharArray(), powerLength);
+            var generator = new WordGenerator(words, powerLength);
             generator.powers = new float[powerLength];
             Console.WriteLine("ready");
 
             while (true) {
                 var read = Console.ReadLine();
-                if (read[0] == '/') {
+                if (0 < read.Length && read[0] == '/') {
                     generator.powers = read.TrimStart('/').Split().Select(s => float.Parse(s)).ToArray();
                     Console.WriteLine("powers set");
                 } else {
-                    var generated = generator.Generate(Environment.TickCount, int.Parse(read));
+                    var generated = generator.Generate(Environment.TickCount);
                     Console.WriteLine(generated);
                 }
             }

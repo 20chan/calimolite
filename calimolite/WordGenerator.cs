@@ -1,15 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace calimolite {
     public class WordGenerator {
+        private static readonly char[] characters = "abcdefghijklmnopqrstuvxyz\0".ToCharArray();
+
         private readonly Array[] weightsList;
         private readonly int weightLength;
-        private readonly char[] characters;
         public float[] powers;
 
-        public WordGenerator(string[] words, char[] characters, int powerLength) {
-            this.characters = characters;
+        public WordGenerator(string[] words, int powerLength) {
             weightLength = powerLength;
             var weightLengths = new int[weightLength];
             for (var i = 0; i < weightLengths.Length; i++) {
@@ -23,13 +24,14 @@ namespace calimolite {
             }
 
             foreach (var word in words) {
-                for (var i = 0; i < word.Length; i++) {
+                var wordPadded = word + '\0';
+                for (var i = 0; i < wordPadded.Length; i++) {
                     for (var j = 1; j < weightLength; j++) {
                         if (0 < i - j) {
-                            Add(word.ToLower().AsSpan().Slice(i - j, j));
+                            Add(wordPadded.ToLower().AsSpan().Slice(i - j, j));
                         }
                         if (i + j < word.Length) {
-                            Add(word.ToLower().AsSpan().Slice(i, j));
+                            Add(wordPadded.ToLower().AsSpan().Slice(i, j));
                         }
                     }
                 }
@@ -39,8 +41,7 @@ namespace calimolite {
                 var weights = weightsList[word.Length - 1];
                 var indices = new int[word.Length];
                 for (var i = 0; i < word.Length; i++) {
-                    var index = word[i] - 'a';
-                    if (index < 0 || 'z' - 'a' < index) {
+                    if (!TryGetCharIndex(word[i], out var index)) {
                         return;
                     }
                     indices[i] = index;
@@ -48,14 +49,23 @@ namespace calimolite {
                 var weight = (int)weights.GetValue(indices);
                 weights.SetValue(weight + 1, indices);
             }
+
+            bool TryGetCharIndex(char c, out int index) {
+                if (c == '\0') {
+                    index = characters.Length - 1;
+                    return true;
+                }
+                index = c - 'a';
+                return index >= 0 && 'z' - 'a' >= index;
+            }
         }
 
-        public string Generate(int seed, int length) {
-            var result = new int[length];
+        public string Generate(int seed) {
+            var result = new List<int>();
             var r = new Random(seed);
-            result[0] = r.Next(characters.Length);
+            result.Add(r.Next(characters.Length));
 
-            for (var i = 1; i < length; i++) {
+            for (var i = 1;; i++) {
                 var weights = new float[characters.Length];
                 var min = Math.Max(i - weightLength + 1, 0);
 
@@ -76,13 +86,14 @@ namespace calimolite {
                 for (var j = 0; j < weights.Length; j++) {
                     random -= weights[j];
                     if (random <= 0) {
-                        result[i] = j;
+                        if (j == weights.Length - 1) {
+                            return new string(result.Select(i => characters[i]).ToArray());
+                        }
+                        result.Add(j);
                         break;
                     }
                 }
             }
-
-            return new string(result.Select(i => characters[i]).ToArray());
         }
     }
 }
